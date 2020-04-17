@@ -1,0 +1,65 @@
+#!/usr/bin/python3
+
+import sys
+import argparse
+from math import sqrt
+
+
+def check_unsigned(a):
+    value = int(a)
+    if value < 0:
+        raise argparse.ArgumentTypeError("%r must be positive."%(value,))
+    return value
+
+
+def check_percent(a):
+    value = float(a)
+    if value < 0 or value > 100:
+        raise argparse.ArgumentTypeError("%r must be a percentage between 0 and 100."%(value,))
+    return value
+
+
+if len(sys.argv) == 4:
+    parser = argparse.ArgumentParser(description='209poll')
+    parser.add_argument('pSize', type=check_unsigned)
+    parser.add_argument('sSize', type=check_unsigned)
+    parser.add_argument('p', type=check_percent)
+
+
+try:
+    args = parser.parse_args()
+except:
+    exit(84)
+
+
+if args.sSize > args.pSize:
+    exit(84)
+
+
+variance = args.p / 100 * (1 - args.p / 100) * (args.pSize - args.sSize) / (args.sSize * (args.pSize - 1))
+
+
+def print_variance():
+    print("Variance:\t\t\t{:.6f}".format(variance))
+
+
+def print_95():
+    inter = ((2*(1.96*sqrt(variance))) * 100) / 2
+    low_inter = args.p - inter
+    high_inter = args.p + inter
+    print("95% confidence interval:\t[{:.2f}%; {:.2f}%]".format(low_inter, high_inter))
+
+
+def print_99():
+    inter = (2*(2.58*sqrt(variance)) * 100) / 2
+    low_inter = args.p - inter
+    high_inter = args.p + inter
+    print("99% confidence interval:\t[{:.2f}%; {:.2f}%]".format(low_inter, high_inter))
+
+
+print("population size:\t\t{:d}".format(args.pSize))
+print("sample size:\t\t\t{:>d}".format(args.sSize))
+print("voting intentions:\t\t{:.2f}%".format(args.p))
+print_variance()
+print_95()
+print_99()
